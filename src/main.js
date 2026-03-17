@@ -1,12 +1,10 @@
-import "./styles/home.scss";
-import "./styles/about.scss";
+import "./styles/styles.scss";
 
-import { getHomeHtml } from "./home.js";
-import { getAboutHtml } from "./about.js";
+import { initApp } from "./app.js";
 
-const app = document.getElementById("app");
-
-app.innerHTML = `
-  ${getHomeHtml()}
-  ${getAboutHtml()}
-`;
+const root = document.getElementById("app");
+if (root) {
+  initApp(root);
+} else {
+  console.error("[B-Score] #app element not found in index.html");
+}

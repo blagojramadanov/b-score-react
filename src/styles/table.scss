@@ -1,0 +1,12 @@
+@use "./variables" as v;
+
+.table-page {
+  padding: 32px 0;
+
+  #tableContainer {
+    background: v.$bg-1;
+    border: 1px solid v.$border;
+    border-radius: v.$radius-lg;
+    overflow: hidden;
+  }
+}

@@ -1,0 +1,120 @@
+@use "./variables" as v;
+
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 300;
+  background: rgba(v.$bg-1, 0.97);
+  border-bottom: 1px solid v.$border;
+  backdrop-filter: blur(12px);
+
+  &__inner {
+    display: flex;
+    align-items: center;
+    height: 56px;
+    gap: v.$space-lg;
+  }
+
+  &__logo {
+    font-family: v.$font-head;
+    font-size: 26px;
+    letter-spacing: 2px;
+    color: v.$text-1;
+    flex-shrink: 0;
+    cursor: pointer;
+    span {
+      color: v.$accent;
+    }
+  }
+
+  &__nav {
+    display: flex;
+    gap: 2px;
+    @media (max-width: v.$bp-md) {
+      display: none;
+    }
+  }
+
+  &__link {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 13px;
+    border-radius: v.$radius-sm;
+    font-size: 13px;
+    font-weight: 500;
+    color: v.$text-2;
+    transition: all v.$t-fast;
+    cursor: pointer;
+    &:hover,
+    &.active {
+      color: v.$text-1;
+      background: v.$bg-4;
+    }
+  }
+
+  &__right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-left: auto;
+  }
+
+  &__quota {
+    font-size: 11px;
+    color: v.$text-3;
+    border: 1px solid v.$border;
+    border-radius: v.$radius-sm;
+    padding: 3px 9px;
+    white-space: nowrap;
+    @media (max-width: v.$bp-sm) {
+      display: none;
+    }
+  }
+
+  &__burger {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: v.$text-2;
+    padding: 4px;
+    @media (max-width: v.$bp-md) {
+      display: block;
+    }
+  }
+
+  &__drawer {
+    display: none;
+    flex-direction: column;
+    background: v.$bg-2;
+    border-top: 1px solid v.$border;
+    padding: v.$space-sm 0;
+
+    &.open {
+      display: flex;
+    }
+
+    @media (max-width: v.$bp-md) {
+      &.open {
+        display: flex;
+      }
+    }
+  }
+
+  &__drawer-link {
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    color: v.$text-2;
+    cursor: pointer;
+    transition: all v.$t-fast;
+    &:hover {
+      color: v.$text-1;
+      background: v.$bg-3;
+    }
+    &.active {
+      color: v.$accent;
+    }
+  }
+}

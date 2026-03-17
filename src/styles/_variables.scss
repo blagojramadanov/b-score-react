@@ -1,12 +1,42 @@
-$primary-blue: #1e73be;
-$dark-blue: #0a3d91;
-$navy-blue: #1e3a8a;
+$bg-0: #07090f;
+$bg-1: #0d1017;
+$bg-2: #131822;
+$bg-3: #1a2130;
+$bg-4: #202840;
 
-$light-yellow: #ffff99;
-$card-yellow: #d9e27c;
+$accent: #00e5a0;
+$accent-2: #0099ff;
+$accent-3: #ff5533;
 
-$white: #ffffff;
-$light-gray: #f5f5f5;
-$hover-gray: #f0f0f0;
+$text-1: #eef0f8;
+$text-2: #8894b0;
+$text-3: #4a5470;
 
-$text-dark: #222222;
+$win: #00e676;
+$draw: #ffc107;
+$loss: #ff4444;
+$live: #ff1744;
+
+$border: rgba(255, 255, 255, 0.06);
+$border-2: rgba(255, 255, 255, 0.12);
+
+$font-head: "Bebas Neue", sans-serif;
+$font-body: "Inter", sans-serif;
+
+$space-xs: 4px;
+$space-sm: 8px;
+$space-md: 16px;
+$space-lg: 24px;
+$space-xl: 40px;
+
+$radius-sm: 5px;
+$radius-md: 8px;
+$radius-lg: 14px;
+
+$ease: cubic-bezier(0.22, 0.68, 0, 1.2);
+$t-fast: 0.12s ease;
+$t-mid: 0.22s ease;
+
+$bp-sm: 480px;
+$bp-md: 768px;
+$bp-lg: 1024px;

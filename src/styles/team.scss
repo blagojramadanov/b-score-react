@@ -1,0 +1,40 @@
+@use "./variables" as v;
+
+.team-page {
+  padding: 32px 0;
+}
+
+.team-hero {
+  display: flex;
+  align-items: center;
+  gap: v.$space-lg;
+  background: v.$bg-1;
+  border: 1px solid v.$border;
+  border-radius: v.$radius-lg;
+  padding: v.$space-xl;
+  margin-bottom: v.$space-lg;
+
+  @media (max-width: v.$bp-sm) {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  &__logo {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    flex-shrink: 0;
+  }
+  &__name {
+    font-family: v.$font-head;
+    font-size: 36px;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+  &__meta,
+  &__venue {
+    font-size: 13px;
+    color: v.$text-2;
+    margin-top: 3px;
+  }
+}
