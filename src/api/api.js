@@ -1,4 +1,9 @@
-const BASE = "/api";
+const IS_DEV =
+  window.location.hostname === "localhost" ||
+  window.location.hostname === "127.0.0.1";
+const BASE = IS_DEV
+  ? "/api"
+  : "https://bscore-proxy.YOUR-SUBDOMAIN.workers.dev";
 const KEY = "8243ec99557b450a9c932eca7d54fa06";
 const RATE_DELAY = 8000;
 const CACHE_TTL = 60 * 60 * 1000;
