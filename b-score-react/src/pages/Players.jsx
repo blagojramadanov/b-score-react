@@ -17,16 +17,25 @@ export default function Players() {
   }, [code]);
 
   return (
-    <section className="players-page">
-      <h1 className="page-title">Top Scorers</h1>
-      <div className="league-buttons">
+    <div className="players-page">
+      <div className="page-header">
+        <h1 className="page-header__title">Top Scorers</h1>
+        <span className="page-header__sub">Season 2025/26</span>
+      </div>
+
+      <div className="league-switcher">
         {LEAGUE_CODES.map((c) => (
           <button
             key={c}
-            className={`league-btn${code === c ? " active" : ""}`}
+            className={`league-switcher__btn${code === c ? " active" : ""}`}
             onClick={() => setCode(c)}
           >
-            {LEAGUES[c].flag} {LEAGUES[c].name}
+            <img
+              src={LEAGUES[c].logo}
+              alt=""
+              onError={(e) => (e.target.style.display = "none")}
+            />
+            <span>{LEAGUES[c].name}</span>
           </button>
         ))}
       </div>
@@ -34,30 +43,30 @@ export default function Players() {
       {loading ? (
         <Spinner />
       ) : !scorers ? (
-        <div className="error-state">No data available.</div>
+        <div className="empty-state">No data available.</div>
       ) : (
-        <div className="players-wrap">
-          <table className="players-table">
+        <div className="table-wrap">
+          <table className="data-table scorers-table">
             <thead>
               <tr>
-                <th>#</th>
-                <th>Player</th>
+                <th className="col-num">#</th>
+                <th className="col-player">Player</th>
                 <th>Nationality</th>
-                <th>Team</th>
-                <th>Goals</th>
+                <th className="col-club">Team</th>
+                <th className="col-pts">Goals</th>
                 <th>Assists</th>
-                <th>Penalties</th>
+                <th>Pen</th>
               </tr>
             </thead>
             <tbody>
               {scorers.map((s, i) => (
                 <tr key={i}>
-                  <td className="rank-cell">{i + 1}</td>
-                  <td className="player-cell">
-                    <span>{s.player.name}</span>
+                  <td className="col-num">{i + 1}</td>
+                  <td className="col-player">
+                    <strong>{s.player.name}</strong>
                   </td>
-                  <td>{s.player.nationality || "—"}</td>
-                  <td className="team-cell">
+                  <td className="col-nat">{s.player.nationality || "—"}</td>
+                  <td className="col-club">
                     {s.team?.crest && (
                       <img
                         src={s.team.crest}
@@ -67,7 +76,7 @@ export default function Players() {
                     )}
                     <span>{s.team?.shortName || s.team?.name || "—"}</span>
                   </td>
-                  <td className="pts-cell">{s.goals ?? 0}</td>
+                  <td className="col-pts">{s.goals ?? 0}</td>
                   <td>{s.assists ?? 0}</td>
                   <td>{s.penalties ?? 0}</td>
                 </tr>
@@ -76,6 +85,6 @@ export default function Players() {
           </table>
         </div>
       )}
-    </section>
+    </div>
   );
 }

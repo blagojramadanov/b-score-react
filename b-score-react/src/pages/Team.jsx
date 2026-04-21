@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { fetchTeam, fetchTeamMatches } from "../api/api.js";
 import Spinner from "../components/Spinner.jsx";
+import MatchRow from "../components/MatchRow.jsx";
 
 export default function Team() {
   const { id, leagueCode } = useParams();
@@ -22,47 +23,56 @@ export default function Team() {
   }, [id, leagueCode]);
 
   if (loading) return <Spinner />;
-  if (!team) return <div className="error-state">Team not found.</div>;
+  if (!team) return <div className="empty-state">Team not found.</div>;
 
+  const teamId = parseInt(id);
   const filtered = () => {
     if (!matches) return [];
-    let list = [...matches].sort(
+    const sorted = [...matches].sort(
       (a, b) => new Date(b.utcDate) - new Date(a.utcDate),
     );
     if (filter === "home")
-      return list.filter((m) => m.homeTeam.id === parseInt(id));
+      return sorted.filter((m) => m.homeTeam.id === teamId);
     if (filter === "away")
-      return list.filter((m) => m.awayTeam.id === parseInt(id));
-    return list;
+      return sorted.filter((m) => m.awayTeam.id === teamId);
+    return sorted;
   };
 
-  const resultLabel = (m) => {
-    const isHome = m.homeTeam.id === parseInt(id);
-    const hg = m.score?.fullTime?.home ?? 0;
-    const ag = m.score?.fullTime?.away ?? 0;
-    const mine = isHome ? hg : ag;
-    const opp = isHome ? ag : hg;
-    return mine > opp ? "W" : mine < opp ? "L" : "D";
-  };
+  const wins =
+    matches?.filter((m) => {
+      const isHome = m.homeTeam.id === teamId;
+      const hg = m.score?.fullTime?.home ?? 0;
+      const ag = m.score?.fullTime?.away ?? 0;
+      return isHome ? hg > ag : ag > hg;
+    }).length ?? 0;
+  const draws =
+    matches?.filter(
+      (m) => (m.score?.fullTime?.home ?? 0) === (m.score?.fullTime?.away ?? 0),
+    ).length ?? 0;
+  const losses = (matches?.length ?? 0) - wins - draws;
 
   return (
-    <section className="team-page">
+    <div className="team-page">
+      <button className="back-btn" onClick={() => navigate(-1)}>
+        ← Back
+      </button>
+
       <div className="team-hero">
         {team.crest && (
-          <img src={team.crest} className="team-hero__logo" alt={team.name} />
+          <img src={team.crest} alt={team.name} className="team-hero__crest" />
         )}
         <div className="team-hero__info">
           <h1 className="team-hero__name">{team.name}</h1>
           <div className="team-hero__meta">
             {team.area?.name && <span>🌍 {team.area.name}</span>}
-            {team.founded && <span>📅 Founded {team.founded}</span>}
+            {team.founded && <span>📅 Est. {team.founded}</span>}
             {team.venue && <span>🏟 {team.venue}</span>}
             {team.website && (
               <a
                 href={team.website}
                 target="_blank"
                 rel="noopener"
-                style={{ color: "var(--accent)" }}
+                className="team-hero__link"
               >
                 Website ↗
               </a>
@@ -71,11 +81,34 @@ export default function Team() {
         </div>
       </div>
 
-      <div className="team-tabs">
+      {matches && (
+        <div className="team-stats">
+          <div className="team-stat">
+            <span className="team-stat__val team-stat__val--win">{wins}</span>
+            <span className="team-stat__lbl">Wins</span>
+          </div>
+          <div className="team-stat">
+            <span className="team-stat__val team-stat__val--draw">{draws}</span>
+            <span className="team-stat__lbl">Draws</span>
+          </div>
+          <div className="team-stat">
+            <span className="team-stat__val team-stat__val--loss">
+              {losses}
+            </span>
+            <span className="team-stat__lbl">Losses</span>
+          </div>
+          <div className="team-stat">
+            <span className="team-stat__val">{matches.length}</span>
+            <span className="team-stat__lbl">Played</span>
+          </div>
+        </div>
+      )}
+
+      <div className="tab-bar">
         {["all", "home", "away"].map((f) => (
           <button
             key={f}
-            className={`ttab${filter === f ? " active" : ""}`}
+            className={`tab${filter === f ? " active" : ""}`}
             onClick={() => setFilter(f)}
           >
             {f.charAt(0).toUpperCase() + f.slice(1)}
@@ -83,67 +116,13 @@ export default function Team() {
         ))}
       </div>
 
-      <div className="results-wrap">
-        <div className="results-list">
-          {filtered().length === 0 ? (
-            <div className="empty-state">No matches found.</div>
-          ) : (
-            filtered().map((m) => {
-              const isHome = m.homeTeam.id === parseInt(id);
-              const opp = isHome ? m.awayTeam : m.homeTeam;
-              const hg = m.score?.fullTime?.home ?? 0;
-              const ag = m.score?.fullTime?.away ?? 0;
-              const mine = isHome ? hg : ag;
-              const oppG = isHome ? ag : hg;
-              const result = resultLabel(m);
-              const dt = new Date(m.utcDate);
-              const date = dt.toLocaleDateString("en-GB", {
-                day: "2-digit",
-                month: "short",
-                year: "numeric",
-              });
-
-              return (
-                <div
-                  key={m.id}
-                  className="team-result-row"
-                  onClick={() => navigate(`/match/${m.id}`)}
-                >
-                  <span className="team-result-row__date">{date}</span>
-                  <span className="team-result-row__venue">
-                    {isHome ? "H" : "A"}
-                  </span>
-                  <div className="team-result-row__opp">
-                    {opp.crest && (
-                      <img
-                        src={opp.crest}
-                        alt=""
-                        onError={(e) => (e.target.style.display = "none")}
-                      />
-                    )}
-                    <span>{opp.shortName || opp.name}</span>
-                  </div>
-                  <div className="team-result-row__score">
-                    <span
-                      className={`result-badge result--${result.toLowerCase()}`}
-                    >
-                      {result}
-                    </span>
-                    <span className="team-result-row__goals">
-                      {mine}–{oppG}
-                    </span>
-                  </div>
-                  <span className="team-result-row__ht">
-                    HT {m.score?.halfTime?.home ?? 0}–
-                    {m.score?.halfTime?.away ?? 0}
-                  </span>
-                  <span className="team-result-row__arrow">→</span>
-                </div>
-              );
-            })
-          )}
-        </div>
+      <div className="matches-list">
+        {filtered().length === 0 ? (
+          <div className="empty-state">No matches found.</div>
+        ) : (
+          filtered().map((m) => <MatchRow key={m.id} match={m} />)
+        )}
       </div>
-    </section>
+    </div>
   );
 }

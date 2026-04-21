@@ -1,6 +1,9 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import { fileURLToPath } from "url";
 import path from "path";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   base: "/b-score-react/",
@@ -17,27 +20,25 @@ export default defineConfig({
       "/api": {
         target: "https://api.football-data.org/v4",
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ""),
+        rewrite: (p) => p.replace(/^\/api/, ""),
         configure: (proxy) => {
           proxy.on("proxyReq", (proxyReq, req) => {
             proxyReq.setHeader("X-Auth-Token", process.env.VITE_API_KEY || "");
-            if (req.headers["x-unfold-goals"])
-              proxyReq.setHeader(
-                "X-Unfold-Goals",
-                req.headers["x-unfold-goals"],
-              );
-            if (req.headers["x-unfold-bookings"])
-              proxyReq.setHeader(
-                "X-Unfold-Bookings",
-                req.headers["x-unfold-bookings"],
-              );
-            if (req.headers["x-unfold-lineups"])
-              proxyReq.setHeader(
-                "X-Unfold-Lineups",
-                req.headers["x-unfold-lineups"],
-              );
-            if (req.headers["x-unfold-subs"])
-              proxyReq.setHeader("X-Unfold-Subs", req.headers["x-unfold-subs"]);
+            [
+              "x-unfold-goals",
+              "x-unfold-bookings",
+              "x-unfold-lineups",
+              "x-unfold-subs",
+            ].forEach((h) => {
+              if (req.headers[h])
+                proxyReq.setHeader(
+                  h
+                    .split("-")
+                    .map((w) => w[0].toUpperCase() + w.slice(1))
+                    .join("-"),
+                  req.headers[h],
+                );
+            });
           });
         },
       },

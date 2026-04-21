@@ -1,10 +1,7 @@
-@use "./variables";
-@use "./global";
-@use "./navbar";
-@use "./footer";
-@use "./home";
-@use "./league";
-@use "./match";
-@use "./team";
-@use "./about";
-@use "./players";
+@use "variables";
+@use "base";
+@use "navbar";
+@use "sidebar";
+@use "layout";
+@use "components";
+@use "pages";

@@ -1,13 +1,11 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../hooks/useTheme.js";
-import { clearCache } from "../api/api.js";
-import { LEAGUES, LEAGUE_CODES } from "../api/api.js";
+import { clearCache, LEAGUES, LEAGUE_CODES } from "../api/api.js";
 
 export default function Navbar() {
   const { theme, toggle } = useTheme();
   const [open, setOpen] = useState(false);
-  const navigate = useNavigate();
 
   const handleRefresh = () => {
     clearCache();
@@ -16,12 +14,12 @@ export default function Navbar() {
 
   return (
     <header className="navbar">
-      <div className="container navbar__inner">
+      <div className="navbar__inner">
         <Link to="/" className="navbar__logo" onClick={() => setOpen(false)}>
           <img
             src="/b-score-react/bscore.png"
             className="navbar__logo-img"
-            alt="B-Score"
+            alt=""
           />
           B<span>·</span>SCORE
         </Link>
@@ -32,7 +30,7 @@ export default function Navbar() {
           </Link>
           {LEAGUE_CODES.map((code) => (
             <Link key={code} className="navbar__link" to={`/league/${code}`}>
-              {LEAGUES[code].name}
+              {LEAGUES[code].flag} {LEAGUES[code].name}
             </Link>
           ))}
           <Link className="navbar__link" to="/players">
@@ -43,16 +41,16 @@ export default function Navbar() {
           </Link>
         </nav>
 
-        <div className="navbar__right">
+        <div className="navbar__actions">
           <button
-            className="navbar__theme-toggle"
+            className="navbar__icon-btn"
             onClick={toggle}
             title="Toggle theme"
           >
             {theme === "dark" ? "☀" : "🌙"}
           </button>
           <button
-            className="navbar__refresh"
+            className="navbar__icon-btn"
             onClick={handleRefresh}
             title="Refresh data"
           >
@@ -65,9 +63,9 @@ export default function Navbar() {
       </div>
 
       {open && (
-        <div className="navbar__drawer">
+        <nav className="navbar__mobile">
           <Link
-            className="navbar__drawer-link"
+            className="navbar__mobile-link"
             to="/"
             onClick={() => setOpen(false)}
           >
@@ -76,7 +74,7 @@ export default function Navbar() {
           {LEAGUE_CODES.map((code) => (
             <Link
               key={code}
-              className="navbar__drawer-link"
+              className="navbar__mobile-link"
               to={`/league/${code}`}
               onClick={() => setOpen(false)}
             >
@@ -84,20 +82,20 @@ export default function Navbar() {
             </Link>
           ))}
           <Link
-            className="navbar__drawer-link"
+            className="navbar__mobile-link"
             to="/players"
             onClick={() => setOpen(false)}
           >
             Players
           </Link>
           <Link
-            className="navbar__drawer-link"
+            className="navbar__mobile-link"
             to="/about"
             onClick={() => setOpen(false)}
           >
             About
           </Link>
-        </div>
+        </nav>
       )}
     </header>
   );

@@ -1,10 +1,9 @@
 const IS_DEV = import.meta.env.DEV;
 const BASE = IS_DEV ? "/api" : import.meta.env.VITE_WORKER_URL;
 const KEY = import.meta.env.VITE_API_KEY;
-
 const RATE_DELAY = 6000;
 const CACHE_TTL = 60 * 60 * 1000;
-const CACHE_VER = "v1";
+const CACHE_VER = "v2";
 
 export const LEAGUES = {
   PL: {
@@ -74,17 +73,14 @@ function lsSet(key, data) {
   } catch {}
 }
 
-async function call(path, extra = {}) {
+async function call(path) {
   const cached = lsGet(path);
   if (cached) return cached;
-
   const since = Date.now() - lastCall;
   if (since < RATE_DELAY) await wait(RATE_DELAY - since);
   lastCall = Date.now();
-
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), 25000);
-
   try {
     const isMatch = path.startsWith("/matches/");
     const r = await fetch(`${BASE}${path}`, {
@@ -98,7 +94,6 @@ async function call(path, extra = {}) {
               "X-Unfold-Subs": "true",
             }
           : {}),
-        ...extra,
       },
       signal: ctrl.signal,
     });
@@ -112,40 +107,36 @@ async function call(path, extra = {}) {
     return json;
   } catch (e) {
     clearTimeout(t);
-    console.warn("[API] failed:", path, e.message);
+    console.warn("[API]", path, e.message);
     return null;
   }
 }
 
-export async function fetchStandings(code) {
+export const fetchStandings = async (code) => {
   const d = await call(`/competitions/${code}/standings`);
   return d?.standings?.find((s) => s.type === "TOTAL")?.table || null;
-}
+};
 
-export async function fetchMatches(code) {
+export const fetchMatches = async (code) => {
   const d = await call(`/competitions/${code}/matches?status=FINISHED`);
   return d?.matches || null;
-}
+};
 
-export async function fetchScorers(code) {
+export const fetchScorers = async (code) => {
   const d = await call(`/competitions/${code}/scorers?limit=20`);
   return d?.scorers || null;
-}
+};
 
-export async function fetchMatch(id) {
-  return await call(`/matches/${id}`);
-}
+export const fetchMatch = async (id) => call(`/matches/${id}`);
 
-export async function fetchTeam(id) {
-  return await call(`/teams/${id}`);
-}
+export const fetchTeam = async (id) => call(`/teams/${id}`);
 
-export async function fetchTeamMatches(teamId, code) {
+export const fetchTeamMatches = async (teamId, code) => {
   const d = await call(
-    `/teams/${teamId}/matches?competitions=${code}&status=FINISHED&limit=20`,
+    `/teams/${teamId}/matches?competitions=${code}&status=FINISHED&limit=30`,
   );
   return d?.matches || null;
-}
+};
 
 export function clearCache() {
   try {

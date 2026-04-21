@@ -1,7 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import { useEffect } from "react";
 import Navbar from "./components/Navbar.jsx";
-import Footer from "./components/Footer.jsx";
+import Sidebar from "./components/Sidebar.jsx";
 import Home from "./pages/Home.jsx";
 import League from "./pages/League.jsx";
 import Match from "./pages/Match.jsx";
@@ -18,17 +18,19 @@ export default function App() {
   return (
     <div className="app-shell">
       <Navbar />
-      <main className="page-content container">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/league/:code" element={<League />} />
-          <Route path="/match/:id" element={<Match />} />
-          <Route path="/team/:id/:leagueCode" element={<Team />} />
-          <Route path="/players" element={<Players />} />
-          <Route path="/about" element={<About />} />
-        </Routes>
-      </main>
-      <Footer />
+      <div className="app-body">
+        <Sidebar />
+        <main className="app-main">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/league/:code" element={<League />} />
+            <Route path="/match/:id" element={<Match />} />
+            <Route path="/team/:id/:leagueCode" element={<Team />} />
+            <Route path="/players" element={<Players />} />
+            <Route path="/about" element={<About />} />
+          </Routes>
+        </main>
+      </div>
     </div>
   );
 }

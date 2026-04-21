@@ -1,38 +1,42 @@
-@use "./variables" as v;
+@use "variables" as v;
 
 .navbar {
   position: sticky;
   top: 0;
-  z-index: 300;
-  background: var(--bg-1);
+  z-index: 200;
+  height: v.$navbar-h;
+  background: var(--bg-card);
   border-bottom: 1px solid var(--border);
-  backdrop-filter: blur(12px);
   box-shadow: var(--shadow);
-  transition: background 0.25s ease;
 
   &__inner {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 0 20px;
+    height: 100%;
     display: flex;
     align-items: center;
-    height: 58px;
-    gap: 20px;
+    gap: 24px;
   }
 
   &__logo {
-    font-family: v.$font-head;
-    font-size: 24px;
-    letter-spacing: 2px;
-    color: var(--text-1);
-    flex-shrink: 0;
-    cursor: pointer;
     display: flex;
     align-items: center;
     gap: 8px;
+    font-family: v.$font-head;
+    font-size: 26px;
+    letter-spacing: 2px;
+    color: var(--text-1);
+    flex-shrink: 0;
+    white-space: nowrap;
+
     span {
       color: var(--accent);
     }
+
     &-img {
-      width: 28px;
-      height: 28px;
+      width: 30px;
+      height: 30px;
       object-fit: contain;
       border-radius: 6px;
     }
@@ -40,97 +44,115 @@
 
   &__nav {
     display: flex;
+    align-items: center;
     gap: 2px;
     overflow-x: auto;
     scrollbar-width: none;
+    flex: 1;
+
     &::-webkit-scrollbar {
       display: none;
     }
+
     @media (max-width: v.$bp-lg) {
       display: none;
     }
   }
 
   &__link {
-    padding: 5px 12px;
-    border-radius: v.$radius-sm;
-    font-size: 12px;
+    padding: 6px 14px;
+    border-radius: v.$r-sm;
+    font-size: 13px;
     font-weight: 500;
     color: var(--text-2);
-    transition: all v.$t;
     white-space: nowrap;
-    flex-shrink: 0;
-    &:hover,
-    &.active {
+    transition: all v.$t;
+
+    &:hover {
       color: var(--text-1);
-      background: var(--bg-3);
+      background: var(--bg-hover);
+    }
+    &.active {
+      color: var(--accent);
+      background: rgba(0, 214, 143, 0.08);
     }
   }
 
-  &__right {
+  &__actions {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     margin-left: auto;
   }
 
-  &__theme-toggle,
-  &__refresh {
-    width: 36px;
-    height: 36px;
-    background: var(--bg-3);
+  &__icon-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: v.$r-sm;
     border: 1px solid var(--border);
-    border-radius: v.$radius-sm;
+    background: var(--bg-hover);
     color: var(--text-2);
-    font-size: 16px;
+    font-size: 15px;
     display: flex;
     align-items: center;
     justify-content: center;
-    cursor: pointer;
     transition: all v.$t;
+
     &:hover {
       color: var(--accent);
       border-color: var(--accent);
     }
   }
 
-  &__refresh:hover {
-    transform: rotate(180deg);
-  }
-
   &__burger {
+    width: 34px;
+    height: 34px;
+    border-radius: v.$r-sm;
+    border: 1px solid var(--border);
+    background: var(--bg-hover);
+    color: var(--text-2);
+    font-size: 18px;
     display: none;
-    font-size: 20px;
-    color: var(--text-2);
-    padding: 4px;
-    @media (max-width: v.$bp-lg) {
-      display: block;
-    }
-  }
-
-  &__drawer {
-    display: flex;
-    flex-direction: column;
-    background: var(--bg-2);
-    border-top: 1px solid var(--border);
-  }
-
-  &__drawer-link {
-    padding: 12px 20px;
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--text-2);
+    align-items: center;
+    justify-content: center;
     transition: all v.$t;
-    border-bottom: 1px solid var(--border);
-    &:last-child {
-      border-bottom: none;
+
+    @media (max-width: v.$bp-lg) {
+      display: flex;
     }
     &:hover {
       color: var(--text-1);
-      background: var(--bg-3);
     }
-    &.active {
-      color: var(--accent);
+  }
+
+  &__mobile {
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border);
+    position: absolute;
+    top: v.$navbar-h;
+    left: 0;
+    right: 0;
+    z-index: 199;
+    max-height: calc(100vh - v.$navbar-h);
+    overflow-y: auto;
+  }
+
+  &__mobile-link {
+    padding: 13px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-2);
+    border-bottom: 1px solid var(--border);
+    transition: all v.$t;
+
+    &:hover {
+      color: var(--text-1);
+      background: var(--bg-hover);
+    }
+    &:last-child {
+      border-bottom: none;
     }
   }
 }

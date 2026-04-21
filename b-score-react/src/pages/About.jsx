@@ -1,75 +1,92 @@
+import { Link } from "react-router-dom";
+import { LEAGUES, LEAGUE_CODES } from "../api/api.js";
+
 export default function About() {
+  const features = [
+    {
+      icon: "📋",
+      title: "Lineups & Formations",
+      desc: "Full starting XI with position diagrams and bench players for every match.",
+    },
+    {
+      icon: "⚽",
+      title: "Goals & Scorers",
+      desc: "Every goal with scorer, assist, minute and type — penalty, own goal or open play.",
+    },
+    {
+      icon: "🟨",
+      title: "Cards & Events",
+      desc: "Yellow cards, red cards, second yellows and substitutions timeline.",
+    },
+    {
+      icon: "📊",
+      title: "Full Standings",
+      desc: "League tables with form guide, goal difference and European zone indicators.",
+    },
+    {
+      icon: "🏆",
+      title: "Top Scorers",
+      desc: "Goals, assists and penalties for top 20 players in each league.",
+    },
+    {
+      icon: "📅",
+      title: "Full Match History",
+      desc: "Every completed fixture for the entire 2025/26 season.",
+    },
+  ];
+
   return (
-    <section className="about">
-      <div className="about__hero">
-        <h1 className="about__title">
-          What is <em>B-Score</em>?
+    <div className="about-page">
+      <div className="about-hero">
+        <h1>
+          B<span>·</span>SCORE
         </h1>
-        <p className="about__lead">
-          Full football data for Europe's top 5 leagues. Match history, lineups,
-          scorers, cards and formations — every match of the 2025/26 season.
+        <p>
+          Football data for Europe's top 5 leagues. No live scores — just deep,
+          accurate stats for the full 2025/26 season.
         </p>
       </div>
-      <div className="about__features">
-        {[
-          {
-            icon: "📋",
-            title: "Match Lineups",
-            desc: "Full starting XI with formation diagram, player positions and the complete bench for every match.",
-          },
-          {
-            icon: "⚽",
-            title: "Goals & Scorers",
-            desc: "Every goal — who scored it, at what minute, penalty or open play, and who assisted.",
-          },
-          {
-            icon: "🟨",
-            title: "Cards & Events",
-            desc: "Yellow cards, red cards, second yellows, substitutions and VAR decisions for every match.",
-          },
-          {
-            icon: "📊",
-            title: "Full Standings",
-            desc: "Live league tables with wins, draws, losses, goal difference, form guide and zone indicators.",
-          },
-          {
-            icon: "🏆",
-            title: "Top Scorers",
-            desc: "Goals, assists and penalties for top players in every league.",
-          },
-          {
-            icon: "👤",
-            title: "Team Profiles",
-            desc: "Season stats, stadium info, home/away record and full match history for every club.",
-          },
-        ].map((f) => (
-          <div key={f.title} className="about-card">
-            <div className="about-card__icon">{f.icon}</div>
-            <h3>{f.title}</h3>
-            <p>{f.desc}</p>
+
+      <div className="about-features">
+        {features.map((f) => (
+          <div key={f.title} className="about-feature">
+            <span className="about-feature__icon">{f.icon}</span>
+            <div>
+              <strong>{f.title}</strong>
+              <p>{f.desc}</p>
+            </div>
           </div>
         ))}
       </div>
-      <div className="about__info">
-        <h2>The 5 Leagues</h2>
-        <ul className="leagues-list">
-          <li>
-            🏴󠁧󠁢󠁥󠁮󠁧󠁿 <strong>Premier League</strong> — England's top flight, 20 clubs
-          </li>
-          <li>
-            🇪🇸 <strong>La Liga</strong> — Spain's top flight, 20 clubs
-          </li>
-          <li>
-            🇮🇹 <strong>Serie A</strong> — Italy's top flight, 20 clubs
-          </li>
-          <li>
-            🇩🇪 <strong>Bundesliga</strong> — Germany's top flight, 18 clubs
-          </li>
-          <li>
-            🇫🇷 <strong>Ligue 1</strong> — France's top flight, 18 clubs
-          </li>
-        </ul>
-        <h2>Data</h2>
+
+      <div className="about-leagues">
+        <h2>Covered Leagues</h2>
+        <div className="about-league-list">
+          {LEAGUE_CODES.map((code) => (
+            <Link
+              key={code}
+              to={`/league/${code}`}
+              className="about-league-item"
+            >
+              <img
+                src={LEAGUES[code].logo}
+                alt=""
+                onError={(e) => (e.target.style.display = "none")}
+              />
+              <div>
+                <strong>{LEAGUES[code].name}</strong>
+                <span>
+                  {LEAGUES[code].flag} {LEAGUES[code].country}
+                </span>
+              </div>
+              <span className="about-league-arrow">→</span>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      <div className="about-data">
+        <h2>Data Source</h2>
         <p>
           All data is provided by{" "}
           <a
@@ -79,9 +96,10 @@ export default function About() {
           >
             football-data.org
           </a>
-          . Season shown: 2025/26.
+          . Free tier — 10 requests per minute. Data is cached locally for 1
+          hour.
         </p>
       </div>
-    </section>
+    </div>
   );
 }

@@ -1,8 +1,8 @@
 export default function Spinner({ text = "Loading…" }) {
   return (
-    <div className="page-loader">
+    <div className="spinner-wrap">
       <div className="spinner" />
-      <p>{text}</p>
+      {text && <span>{text}</span>}
     </div>
   );
 }

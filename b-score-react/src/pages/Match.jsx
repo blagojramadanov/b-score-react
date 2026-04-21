@@ -1,14 +1,13 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { fetchMatch } from "../api/api.js";
 import Spinner from "../components/Spinner.jsx";
 import MatchEvents from "../components/MatchEvents.jsx";
 import LineupGrid from "../components/LineupGrid.jsx";
 
-const TABS = ["events", "lineups"];
-
 export default function Match() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [match, setMatch] = useState(null);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState("events");
@@ -21,10 +20,12 @@ export default function Match() {
   }, [id]);
 
   if (loading) return <Spinner />;
-  if (!match) return <div className="error-state">Match not found.</div>;
+  if (!match) return <div className="empty-state">Match not found.</div>;
 
   const hg = match.score?.fullTime?.home ?? 0;
   const ag = match.score?.fullTime?.away ?? 0;
+  const hhg = match.score?.halfTime?.home ?? 0;
+  const hag = match.score?.halfTime?.away ?? 0;
   const dt = new Date(match.utcDate);
   const dateStr = dt.toLocaleDateString("en-GB", {
     weekday: "long",
@@ -34,67 +35,72 @@ export default function Match() {
   });
 
   return (
-    <section className="match-page">
-      <div className="match-header">
-        <div className="match-header__league">
+    <div className="match-page">
+      <button className="back-btn" onClick={() => navigate(-1)}>
+        ← Back
+      </button>
+
+      <div className="match-hero">
+        <div className="match-hero__meta">
           {match.competition?.emblem && (
             <img src={match.competition.emblem} alt="" />
           )}
-          <span>
-            {match.competition?.name} · Matchday {match.matchday}
-          </span>
+          <span>{match.competition?.name}</span>
+          <span className="match-hero__dot">·</span>
+          <span>Matchday {match.matchday}</span>
+          <span className="match-hero__dot">·</span>
+          <span>{dateStr}</span>
         </div>
-        <div className="match-header__date">{dateStr}</div>
-        <div className="match-header__scoreboard">
-          <div className="match-header__team">
+
+        <div className="match-hero__scoreboard">
+          <div className="match-hero__team">
             {match.homeTeam.crest && (
               <img
                 src={match.homeTeam.crest}
-                className="match-header__badge"
                 alt=""
+                className="match-hero__crest"
               />
             )}
-            <span className="match-header__team-name">
-              {match.homeTeam.name}
-            </span>
+            <span className="match-hero__name">{match.homeTeam.name}</span>
           </div>
-          <div className="match-header__score">
-            <span className={hg > ag ? "score--win" : ""}>{hg}</span>
-            <span className="score-sep">–</span>
-            <span className={ag > hg ? "score--win" : ""}>{ag}</span>
-            <div className="match-header__ht">
-              HT {match.score?.halfTime?.home ?? 0}–
-              {match.score?.halfTime?.away ?? 0}
+
+          <div className="match-hero__center">
+            <div className="match-hero__score">
+              <span className={hg > ag ? "score-win" : ""}>{hg}</span>
+              <span className="score-sep">–</span>
+              <span className={ag > hg ? "score-win" : ""}>{ag}</span>
             </div>
+            <div className="match-hero__ht">
+              HT {hhg}–{hag}
+            </div>
+            <div className="match-hero__status">FT</div>
           </div>
-          <div className="match-header__team match-header__team--away">
+
+          <div className="match-hero__team match-hero__team--away">
             {match.awayTeam.crest && (
               <img
                 src={match.awayTeam.crest}
-                className="match-header__badge"
                 alt=""
+                className="match-hero__crest"
               />
             )}
-            <span className="match-header__team-name">
-              {match.awayTeam.name}
-            </span>
+            <span className="match-hero__name">{match.awayTeam.name}</span>
           </div>
         </div>
-        {match.venue && (
-          <div className="match-header__venue">📍 {match.venue}</div>
-        )}
-        {match.referees?.length > 0 && (
-          <div className="match-header__referee">
-            👤 {match.referees[0].name}
-          </div>
-        )}
+
+        <div className="match-hero__details">
+          {match.venue && <span>📍 {match.venue}</span>}
+          {match.referees?.length > 0 && (
+            <span>👤 {match.referees[0].name}</span>
+          )}
+        </div>
       </div>
 
-      <div className="match-tabs">
-        {TABS.map((t) => (
+      <div className="tab-bar">
+        {["events", "lineups"].map((t) => (
           <button
             key={t}
-            className={`mtab${tab === t ? " active" : ""}`}
+            className={`tab${tab === t ? " active" : ""}`}
             onClick={() => setTab(t)}
           >
             {t.charAt(0).toUpperCase() + t.slice(1)}
@@ -102,10 +108,10 @@ export default function Match() {
         ))}
       </div>
 
-      <div className="match-tab-content">
+      <div className="tab-content">
         {tab === "events" && <MatchEvents match={match} />}
         {tab === "lineups" && <LineupGrid match={match} />}
       </div>
-    </section>
+    </div>
   );
 }

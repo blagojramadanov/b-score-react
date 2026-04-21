@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { fetchStandings, LEAGUES, LEAGUE_CODES } from "../api/api.js";
-import MiniTable from "../components/MiniTable.jsx";
+import Spinner from "../components/Spinner.jsx";
 
 export default function Home() {
   const [standings, setStandings] = useState({});
+  const [activeLeague, setActiveLeague] = useState("PL");
+  const navigate = useNavigate();
 
   useEffect(() => {
     let cancelled = false;
@@ -21,158 +23,157 @@ export default function Home() {
     };
   }, []);
 
-  return (
-    <section className="home">
-      <div className="hero">
-        <div className="hero__inner">
-          <div className="hero__left">
-            <div className="hero__badge">2025 / 26 Season</div>
-            <h1 className="hero__title">
-              The Score.
-              <br />
-              <em>The Real One.</em>
-            </h1>
-            <p className="hero__sub">
-              Full match history, lineups, scorers, cards and standings for
-              Europe's top 5 leagues.
-            </p>
-            <div className="hero__actions">
-              <Link className="btn btn--accent" to="/league/PL">
-                Explore Leagues
-              </Link>
-              <Link className="btn btn--ghost" to="/about">
-                About B-Score
-              </Link>
-            </div>
-            <div className="hero__stats">
-              <div className="hero__stat">
-                <span className="hero__stat-val">5</span>
-                <span className="hero__stat-lbl">Leagues</span>
-              </div>
-              <div className="hero__stat">
-                <span className="hero__stat-val">98</span>
-                <span className="hero__stat-lbl">Teams</span>
-              </div>
-              <div className="hero__stat">
-                <span className="hero__stat-val">380+</span>
-                <span className="hero__stat-lbl">Matches</span>
-              </div>
-            </div>
-          </div>
-          <div className="hero__image-wrap">
-            <img
-              src="/b-score-react/topleagues.jpg"
-              alt="Top Leagues"
-              className="hero__image"
-            />
-            <div className="hero__image-overlay" />
-          </div>
-        </div>
-      </div>
+  const rows = standings[activeLeague];
 
-      <div className="features-bar">
-        <div className="container features-bar__inner">
-          {[
-            {
-              icon: "📋",
-              title: "Lineups",
-              desc: "Starting XI & bench for every match",
-            },
-            {
-              icon: "⚽",
-              title: "Scorers",
-              desc: "Goals, assists & minute by minute",
-            },
-            {
-              icon: "🟨",
-              title: "Cards",
-              desc: "Yellow, red & all match events",
-            },
-            {
-              icon: "📊",
-              title: "Standings",
-              desc: "Full tables with form & zones",
-            },
-          ].map((f) => (
-            <div key={f.title} className="features-bar__item">
-              <span className="features-bar__icon">{f.icon}</span>
-              <div>
-                <strong>{f.title}</strong>
-                <p>{f.desc}</p>
-              </div>
-            </div>
+  return (
+    <div className="home">
+      <div className="home__hero">
+        <div className="home__hero-text">
+          <h1>
+            B<span>·</span>SCORE
+          </h1>
+          <p>
+            Match history, lineups, scorers &amp; standings for Europe's top 5
+            leagues — Season 2025/26
+          </p>
+        </div>
+        <div className="home__hero-leagues">
+          {LEAGUE_CODES.map((code) => (
+            <Link
+              key={code}
+              to={`/league/${code}`}
+              className="hero-league-badge"
+            >
+              <img
+                src={LEAGUES[code].logo}
+                alt=""
+                onError={(e) => (e.target.style.display = "none")}
+              />
+              <span>{LEAGUES[code].name}</span>
+            </Link>
           ))}
         </div>
       </div>
 
-      <div className="home__leagues">
-        <div className="container">
-          <div className="home__leagues-header">
-            <h2 className="section-title">Top 5 Leagues</h2>
-            <span className="home__season-badge">Season 2025/26</span>
+      <div className="home__content">
+        <div className="home__standings-widget">
+          <div className="widget-header">
+            <span className="widget-header__title">Standings</span>
+            <div className="widget-header__tabs">
+              {LEAGUE_CODES.map((code) => (
+                <button
+                  key={code}
+                  className={`widget-tab${activeLeague === code ? " active" : ""}`}
+                  onClick={() => setActiveLeague(code)}
+                >
+                  <img
+                    src={LEAGUES[code].logo}
+                    alt=""
+                    onError={(e) => (e.target.style.display = "none")}
+                  />
+                </button>
+              ))}
+            </div>
           </div>
-          <div className="league-cards">
+          <div className="widget-body">
+            {!rows ? (
+              <Spinner text="" />
+            ) : (
+              <>
+                <table className="mini-standings">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Club</th>
+                      <th>P</th>
+                      <th>W</th>
+                      <th>D</th>
+                      <th>L</th>
+                      <th>GD</th>
+                      <th>Pts</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {rows.slice(0, 10).map((r) => (
+                      <tr
+                        key={r.team.id}
+                        onClick={() =>
+                          navigate(`/team/${r.team.id}/${activeLeague}`)
+                        }
+                      >
+                        <td className="col-num">{r.position}</td>
+                        <td className="col-club">
+                          {r.team.crest && (
+                            <img
+                              src={r.team.crest}
+                              alt=""
+                              onError={(e) => (e.target.style.display = "none")}
+                            />
+                          )}
+                          <span>{r.team.shortName || r.team.name}</span>
+                        </td>
+                        <td>{r.playedGames}</td>
+                        <td>{r.won}</td>
+                        <td>{r.draw}</td>
+                        <td>{r.lost}</td>
+                        <td>
+                          {r.goalDifference > 0
+                            ? `+${r.goalDifference}`
+                            : r.goalDifference}
+                        </td>
+                        <td className="col-pts">{r.points}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <Link to={`/league/${activeLeague}`} className="widget-footer">
+                  Full table — {LEAGUES[activeLeague].name} →
+                </Link>
+              </>
+            )}
+          </div>
+        </div>
+
+        <div className="home__info">
+          <div className="info-card">
+            <h3>What is B-Score?</h3>
+            <p>
+              Full match data for Europe's top 5 leagues. Standings, scorers,
+              lineups, cards and results — all in one place.
+            </p>
+          </div>
+          <div className="info-features">
+            {[
+              { icon: "📋", label: "Lineups & Formations" },
+              { icon: "⚽", label: "Goals & Scorers" },
+              { icon: "🟨", label: "Cards & Events" },
+              { icon: "📊", label: "Full Standings" },
+              { icon: "🏆", label: "Top Scorers" },
+              { icon: "📅", label: "Match History" },
+            ].map((f) => (
+              <div key={f.label} className="info-feature">
+                <span>{f.icon}</span>
+                <span>{f.label}</span>
+              </div>
+            ))}
+          </div>
+          <div className="league-grid">
             {LEAGUE_CODES.map((code) => (
-              <Link key={code} className="league-card" to={`/league/${code}`}>
-                <div className="league-card__top">
-                  <div className="league-card__logo-wrap">
-                    <img
-                      className="league-card__logo"
-                      src={LEAGUES[code].logo}
-                      alt={LEAGUES[code].name}
-                      onError={(e) => {
-                        e.target.style.display = "none";
-                        e.target.nextSibling.style.display = "flex";
-                      }}
-                    />
-                    <span
-                      className="league-card__logo-fallback"
-                      style={{ display: "none" }}
-                    >
-                      {LEAGUES[code].flag}
-                    </span>
-                  </div>
-                  <div className="league-card__info">
-                    <span className="league-card__name">
-                      {LEAGUES[code].name}
-                    </span>
-                    <span className="league-card__country">
-                      {LEAGUES[code].flag} {LEAGUES[code].country}
-                    </span>
-                  </div>
-                  <span className="league-card__arrow">→</span>
-                </div>
-                <div className="league-card__standings">
-                  <MiniTable rows={standings[code]} code={code} />
+              <Link key={code} to={`/league/${code}`} className="league-pill">
+                <img
+                  src={LEAGUES[code].logo}
+                  alt=""
+                  onError={(e) => (e.target.style.display = "none")}
+                />
+                <div>
+                  <strong>{LEAGUES[code].name}</strong>
+                  <span>{LEAGUES[code].country}</span>
                 </div>
               </Link>
             ))}
           </div>
         </div>
       </div>
-
-      <div className="players-banner">
-        <div className="players-banner__img-wrap">
-          <img
-            src="/b-score-react/players.jpg"
-            alt="Players"
-            className="players-banner__img"
-          />
-          <div className="players-banner__overlay" />
-        </div>
-        <div className="players-banner__content container">
-          <div className="players-banner__text">
-            <h2>Track Every Player</h2>
-            <p>
-              Goals, assists, cards and season stats for every player across all
-              five leagues.
-            </p>
-            <Link className="btn btn--accent" to="/league/PL">
-              View Standings
-            </Link>
-          </div>
-        </div>
-      </div>
-    </section>
+    </div>
   );
 }

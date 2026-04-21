@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import {
   fetchStandings,
   fetchMatches,
@@ -7,10 +7,8 @@ import {
   LEAGUES,
 } from "../api/api.js";
 import StandingsTable from "../components/StandingsTable.jsx";
-import ResultRow from "../components/ResultRow.jsx";
+import MatchRow from "../components/MatchRow.jsx";
 import Spinner from "../components/Spinner.jsx";
-
-const TABS = ["standings", "results", "scorers"];
 
 export default function League() {
   const { code } = useParams();
@@ -22,38 +20,41 @@ export default function League() {
   useEffect(() => {
     setData(null);
     setLoading(true);
-    loadTab(tab);
+    const load = async () => {
+      let result = null;
+      if (tab === "standings") result = await fetchStandings(code);
+      if (tab === "results") result = await fetchMatches(code);
+      if (tab === "scorers") result = await fetchScorers(code);
+      setData(result);
+      setLoading(false);
+    };
+    load();
   }, [code, tab]);
 
-  async function loadTab(t) {
-    setLoading(true);
-    let result = null;
-    if (t === "standings") result = await fetchStandings(code);
-    if (t === "results") result = await fetchMatches(code);
-    if (t === "scorers") result = await fetchScorers(code);
-    setData(result);
-    setLoading(false);
-  }
-
-  if (!meta) return <div className="error-state">League not found.</div>;
+  if (!meta) return <div className="empty-state">League not found.</div>;
 
   return (
-    <section className="league-page">
-      <div className="league-hero">
-        <span className="league-hero__flag">{meta.flag}</span>
+    <div className="league-page">
+      <div className="page-header">
+        <img
+          src={meta.logo}
+          alt=""
+          className="page-header__logo"
+          onError={(e) => (e.target.style.display = "none")}
+        />
         <div>
-          <h1 className="league-hero__name">{meta.name}</h1>
-          <span className="league-hero__country">
+          <h1 className="page-header__title">{meta.name}</h1>
+          <span className="page-header__sub">
             {meta.country} · Season 2025/26
           </span>
         </div>
       </div>
 
-      <div className="league-tabs">
-        {TABS.map((t) => (
+      <div className="tab-bar">
+        {["standings", "results", "scorers"].map((t) => (
           <button
             key={t}
-            className={`ltab${tab === t ? " active" : ""}`}
+            className={`tab${tab === t ? " active" : ""}`}
             onClick={() => setTab(t)}
           >
             {t.charAt(0).toUpperCase() + t.slice(1)}
@@ -61,7 +62,7 @@ export default function League() {
         ))}
       </div>
 
-      <div id="leagueTabContent">
+      <div className="tab-content">
         {loading ? (
           <Spinner />
         ) : (
@@ -69,24 +70,26 @@ export default function League() {
             {tab === "standings" && (
               <StandingsTable rows={data} leagueCode={code} />
             )}
+
             {tab === "results" &&
-              (data?.length ? (
-                <div className="results-wrap">
-                  <div className="results-list">
-                    {[...data]
-                      .sort((a, b) => new Date(b.utcDate) - new Date(a.utcDate))
-                      .map((m) => (
-                        <ResultRow key={m.id} match={m} />
-                      ))}
-                  </div>
-                </div>
-              ) : (
+              (!data?.length ? (
                 <div className="empty-state">No results found.</div>
+              ) : (
+                <div className="matches-list">
+                  {[...data]
+                    .sort((a, b) => new Date(b.utcDate) - new Date(a.utcDate))
+                    .map((m) => (
+                      <MatchRow key={m.id} match={m} />
+                    ))}
+                </div>
               ))}
+
             {tab === "scorers" &&
-              (data?.length ? (
-                <div className="players-wrap">
-                  <table className="players-table">
+              (!data?.length ? (
+                <div className="empty-state">No scorer data.</div>
+              ) : (
+                <div className="table-wrap">
+                  <table className="data-table">
                     <thead>
                       <tr>
                         <th>#</th>
@@ -94,16 +97,15 @@ export default function League() {
                         <th>Team</th>
                         <th>Goals</th>
                         <th>Assists</th>
+                        <th>Pen</th>
                       </tr>
                     </thead>
                     <tbody>
                       {data.map((s, i) => (
                         <tr key={i}>
-                          <td className="rank-cell">{i + 1}</td>
-                          <td className="player-cell">
-                            <span>{s.player.name}</span>
-                          </td>
-                          <td className="team-cell">
+                          <td className="col-num">{i + 1}</td>
+                          <td className="col-player">{s.player.name}</td>
+                          <td className="col-club">
                             {s.team?.crest && (
                               <img
                                 src={s.team.crest}
@@ -117,19 +119,18 @@ export default function League() {
                               {s.team?.shortName || s.team?.name || "—"}
                             </span>
                           </td>
-                          <td className="pts-cell">{s.goals ?? 0}</td>
+                          <td className="col-pts">{s.goals ?? 0}</td>
                           <td>{s.assists ?? 0}</td>
+                          <td>{s.penalties ?? 0}</td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
-              ) : (
-                <div className="empty-state">No scorer data.</div>
               ))}
           </>
         )}
       </div>
-    </section>
+    </div>
   );
 }

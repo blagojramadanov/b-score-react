@@ -1,44 +1,35 @@
 import { useNavigate } from "react-router-dom";
 
+const ZONES = (pos, total) => {
+  if (pos <= 4) return "ucl";
+  if (pos <= 6) return "uel";
+  if (pos === 7) return "conf";
+  if (pos >= total - 2) return "rel";
+  return "";
+};
+
+const parseForm = (form) => {
+  if (!form) return [];
+  if (form.includes(","))
+    return form
+      .split(",")
+      .slice(-5)
+      .map((c) => (c === "WIN" ? "W" : c === "DRAW" ? "D" : "L"));
+  return form.slice(-5).split("");
+};
+
 export default function StandingsTable({ rows, leagueCode }) {
   const navigate = useNavigate();
-  if (!rows)
-    return <div className="error-state">Could not load standings.</div>;
-
-  const total = rows.length;
-
-  const zone = (pos) => {
-    if (pos <= 4) return "zone-ucl";
-    if (pos <= 6) return "zone-uel";
-    if (pos === 7) return "zone-conf";
-    if (pos >= total - 2) return "zone-rel";
-    return "";
-  };
-
-  const parseForm = (form) => {
-    if (!form) return [];
-    if (form.includes(",")) {
-      return form
-        .split(",")
-        .slice(-5)
-        .map((c) => (c === "WIN" ? "W" : c === "DRAW" ? "D" : "L"));
-    }
-    return form.slice(-5).split("");
-  };
+  if (!rows?.length)
+    return <div className="empty-state">No standings available.</div>;
 
   return (
-    <div className="standings-wrap">
-      <div className="zone-legend">
-        <span className="zone-item zone-item--ucl">Champions League</span>
-        <span className="zone-item zone-item--uel">Europa League</span>
-        <span className="zone-item zone-item--conf">Conference</span>
-        <span className="zone-item zone-item--rel">Relegation</span>
-      </div>
-      <table className="standings-table">
+    <div className="table-wrap">
+      <table className="data-table standings-table">
         <thead>
           <tr>
-            <th>#</th>
-            <th>Club</th>
+            <th className="col-pos">#</th>
+            <th className="col-team">Club</th>
             <th>P</th>
             <th>W</th>
             <th>D</th>
@@ -46,25 +37,28 @@ export default function StandingsTable({ rows, leagueCode }) {
             <th>GF</th>
             <th>GA</th>
             <th>GD</th>
-            <th>Form</th>
-            <th>Pts</th>
+            <th className="col-form">Form</th>
+            <th className="col-pts">Pts</th>
           </tr>
         </thead>
         <tbody>
           {rows.map((r) => {
-            const z = zone(r.position);
+            const zone = ZONES(r.position, rows.length);
             const gd =
               r.goalDifference > 0 ? `+${r.goalDifference}` : r.goalDifference;
             const form = parseForm(r.form);
             return (
               <tr
                 key={r.team.id}
-                className={z}
+                className={zone ? `zone-${zone}` : ""}
                 onClick={() => navigate(`/team/${r.team.id}/${leagueCode}`)}
-                style={{ cursor: "pointer" }}
               >
-                <td className={`pos-cell ${z}`}>{r.position}</td>
-                <td className="team-cell">
+                <td
+                  className={`col-pos ${zone ? `zone-marker zone-marker--${zone}` : ""}`}
+                >
+                  {r.position}
+                </td>
+                <td className="col-team">
                   {r.team.crest && (
                     <img
                       src={r.team.crest}
@@ -81,24 +75,28 @@ export default function StandingsTable({ rows, leagueCode }) {
                 <td>{r.goalsFor}</td>
                 <td>{r.goalsAgainst}</td>
                 <td>{gd}</td>
-                <td>
-                  <div className="form-dots">
-                    {form.map((c, i) => (
-                      <span
-                        key={i}
-                        className={`form-dot form-dot--${c === "W" ? "w" : c === "D" ? "d" : "l"}`}
-                      >
-                        {c}
-                      </span>
-                    ))}
-                  </div>
+                <td className="col-form">
+                  {form.map((c, i) => (
+                    <span
+                      key={i}
+                      className={`form-dot form-dot--${c === "W" ? "w" : c === "D" ? "d" : "l"}`}
+                    >
+                      {c}
+                    </span>
+                  ))}
                 </td>
-                <td className="pts-cell">{r.points}</td>
+                <td className="col-pts">{r.points}</td>
               </tr>
             );
           })}
         </tbody>
       </table>
+      <div className="zone-legend">
+        <span className="zone-legend__item ucl">Champions League</span>
+        <span className="zone-legend__item uel">Europa League</span>
+        <span className="zone-legend__item conf">Conference</span>
+        <span className="zone-legend__item rel">Relegation</span>
+      </div>
     </div>
   );
 }
